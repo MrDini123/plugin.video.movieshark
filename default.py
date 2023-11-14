@@ -335,6 +335,7 @@ def build_movie_directory(foldername, pagenum, action):
 
         result = client.parseDOM(url_content, 'ul', attrs={'class': 'row list-unstyled movie-list'})
         items = client.parseDOM(result, 'li', attrs={'class': 'col-md-2.+?'})
+        cf_headers = client.cf_headers()
         for item in items:
             title = client.parseDOM(item, 'span', attrs={'class': 'title'})[0]
             title = py2_encode(client.replaceHTMLCodes(title))
@@ -343,7 +344,7 @@ def build_movie_directory(foldername, pagenum, action):
             link = py2_encode(link)
 
             img = client.parseDOM(item, 'img', ret='src')[0]
-            img = py2_encode(img)
+            img = base_filmezz + py2_encode(img) + "|" + cf_headers
 
             url = build_url({'mode': 'movie_folder', 'foldername': link, 'title': title, 'image': img})
 
@@ -455,6 +456,7 @@ def build_movie_directory(foldername, pagenum, action):
 
             result = client.parseDOM(url_content, 'ul', attrs={'class': 'row list-unstyled movie-list'})
             items = client.parseDOM(result, 'li', attrs={'class': 'col-md-2.+?'})
+            cf_headers = client.cf_headers()
 
             for item in items:
                 title = client.parseDOM(item, 'span', attrs={'class': 'title'})[0]
@@ -462,9 +464,9 @@ def build_movie_directory(foldername, pagenum, action):
 
                 link = client.parseDOM(item, 'a', ret='href')[0]
                 link = py2_encode(link)
-
+                
                 img = client.parseDOM(item, 'img', ret='src')[0]
-                img = py2_encode(img)
+                img = base_filmezz + py2_encode(img) + "|" + cf_headers
 
                 url = build_url({'mode': 'movie_folder', 'foldername': link, 'title': title, 'image': img})
 
@@ -516,9 +518,10 @@ def build_movie_directory(foldername, pagenum, action):
     elif foldername == 'Kedvencek':
         if os.path.isfile(favourite_file):
             the_file = open(favourite_file, 'r')
+            cf_headers = client.cf_headers()
             for line in the_file:
                 movie_data = line.split('=spl=')
-                img = base_filmezz + '/nagykep/' + movie_data[0].split('\/')[-1] + '.jpg'
+                img = base_filmezz + '/nagykep/' + movie_data[0].split('\/')[-1] + '.jpg' + "|" + cf_headers
                 url = build_url({'mode': 'movie_folder', 'foldername': movie_data[0], 'title': movie_data[1], 'image': img})
                 li = xbmcgui.ListItem(movie_data[1] + movie_data[2])
                 li.setArt({'icon': img})
@@ -630,14 +633,15 @@ def find_videourl(foldername, foldertitle, folderimage, isdownload, meta, dname)
 
 
 def build_movie_links(foldername, foldertitle, folderimage):
+    cf_headers = client.cf_headers()
     top_url = urlparse.urljoin(base_filmezz, foldername)
 
     meta = metacache.get(fanart.get, 720, foldertitle, foldername)
 
     try:
-        poster = meta['poster']
+        poster = meta['poster'] + "|" + cf_headers
     except:
-        poster = urlparse.urljoin(base_filmezz, folderimage)
+        poster = urlparse.urljoin(base_filmezz, folderimage) + "|" + cf_headers
 
     try:
         youtube_id = meta['youtube']
@@ -688,7 +692,7 @@ def build_movie_links(foldername, foldertitle, folderimage):
             raise Exception()
         url = build_url({'mode': 'trailer', 'title': foldertitle, 'id': youtube_id})
         li = xbmcgui.ListItem('[COLOR orange]' + py2_decode(foldertitle) + u' EL\u0150ZETES[/COLOR]')
-        li.setArt({'icon': base_filmezz + '/nagykep/' + folderimage + '.jpg'})
+        li.setArt({'icon': base_filmezz + '/nagykep/' + folderimage + '.jpg' + "|" + cf_headers})
         li.setArt({'icon': poster, 'thumb': poster, 'poster': poster})
         li.setProperty('fanart_image', meta['fanart'])
         xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,listitem=li, isFolder=False)

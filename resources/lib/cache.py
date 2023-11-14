@@ -97,6 +97,17 @@ def timeout(function, *args, **table):
         return int(match[3])
     except:
         return
+    
+def drop_table(table):
+    try:
+        control.makeFile(control.dataPath)
+        dbcon = database.connect(control.cacheFile)
+        dbcur = dbcon.cursor()
+        dbcur.execute("DROP TABLE IF EXISTS %s" % table)
+        dbcur.execute("VACUUM")
+        dbcon.commit()
+    except:
+        pass
 
 
 def clear(table=None):

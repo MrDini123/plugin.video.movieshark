@@ -2,6 +2,8 @@
 
 import re,sys,random
 from resources.lib import cache
+from resources.lib.cloudflare import start_serving, get_cf_cookie, get_cf_url, get_cf_user_agent
+import xbmc
 
 if sys.version_info[0] == 3:
     import urllib.request as urllib2
@@ -62,6 +64,12 @@ def request(url, close=True, error=False, proxy=None, post=None, headers=None, m
             pass
         elif not cookie == None:
             headers['Cookie'] = cookie
+        cf_cookie = cache.get(get_cf_cookie, 1, table="captcha")
+        cf_url = cache.get(get_cf_url, 1, table="captcha")
+        cf_user_agent = cache.get(get_cf_user_agent, 1, table="captcha")
+        if cf_cookie and cf_url and cf_user_agent and cf_url in url:
+            headers['Cookie'] = "cf_clearance=%s" % cf_cookie
+            headers['User-Agent'] = cf_user_agent
         
         if sys.version_info[0] == 3:
             request = urllib2.Request(url, data=(post.encode('utf-8') if post != None else post), headers=headers)
@@ -70,7 +78,12 @@ def request(url, close=True, error=False, proxy=None, post=None, headers=None, m
 
         try:
             response = urllib2.urlopen(request, timeout=int(timeout))
-        except HTTPError as response:
+        except HTTPError as e:
+            if e.code == 403 and b'<head><title>Just a moment...</title>' in e.read():
+                xbmc.log('Cloudflare captcha detected, trying to bypass it', xbmc.LOGERROR)
+                url = urlparse.urlparse(e.url)
+                start_serving(url.scheme + '://' + url.netloc)
+                return request(url, close, error, proxy, post, headers, mobile, safe, referer, cookie, output, timeout)
             if error == False: return
 
         if output == 'cookie':

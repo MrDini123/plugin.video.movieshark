@@ -2,6 +2,7 @@
 <addon id="plugin.video.movieshark" name="Movie Shark" version="2.2.4" provider-name="Murdock - vazzemiko - vargalex">
 	<requires>
 		<import addon="script.module.resolveurl" version="5.1.00"/>
+		<import addon="script.module.bottle" version="0.12.18"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
 		<provides>video</provides>

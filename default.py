@@ -1,4 +1,4 @@
-import os, sys, re, xbmcaddon, xbmcgui, xbmcplugin, shutil, json, datetime
+import os, sys, re, xbmcaddon, xbmcgui, xbmcplugin, xbmc, shutil, json, datetime
 import resolveurl as urlresolver
 
 from resources.lib import client

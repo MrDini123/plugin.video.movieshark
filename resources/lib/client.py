@@ -8,13 +8,22 @@ import xbmc
 if sys.version_info[0] == 3:
     import urllib.request as urllib2
     import urllib.parse as urlparse
+    from urllib.parse import urlencode
     import html
     from urllib.error import HTTPError as HTTPError
 else:
+    from urllib import urlencode
     import urllib2
     import urlparse
     import HTMLParser
     from urllib2 import HTTPError as HTTPError
+
+def cf_headers():
+    headers = {
+        "User-Agent": cache.get(get_cf_user_agent, 1, table="captcha"),
+        "Cookie": "cf_clearance=%s" % cache.get(get_cf_cookie, 1, table="captcha"),
+    }
+    return urlencode(headers)
 
 def request(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, safe=False, referer=None, cookie=None, output='', timeout='30'):
     try:
